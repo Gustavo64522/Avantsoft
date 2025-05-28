@@ -51,7 +51,7 @@ A aplicação front-end foi desenvolvida em React com TypeScript, consumindo dad
 
 ```bash
 # Clone o repositório
-git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/Gustavo64522/Avantsoft.git)
+git clone https://github.com/Gustavo64522/Avantsoft.git
 
 # Acesse a pasta do projeto
 cd Avantsoft
