@@ -30,6 +30,7 @@ A aplicação front-end foi desenvolvida em React com TypeScript, consumindo dad
 ---
 
 ## Estrutura do Projeto
+```
 📦 src
 ┣ 📂 components
 ┣ 📂 contexts
@@ -41,6 +42,7 @@ A aplicação front-end foi desenvolvida em React com TypeScript, consumindo dad
 ┣ 📂 types
 ┣ 📂 utils
 ┗ 📜 App.tsx
+```
 
 
 ---
@@ -59,5 +61,7 @@ npm install
 
 # Inicie a aplicação
 npm run dev
+```
+---
 
 Feito  por [Gustavo Andrade](https://github.com/gustavo64522)
