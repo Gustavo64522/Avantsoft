@@ -1,54 +1,63 @@
-# React + TypeScript + Vite
+## Visão Geral do Projeto
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este projeto tem como objetivo a implementação de uma aplicação web para cadastro, listagem e análise de clientes e suas vendas, com foco na qualidade do código, boas práticas, autenticação e manipulação dos dados consumidos via API.
 
-Currently, two official plugins are available:
+A aplicação front-end foi desenvolvida em React com TypeScript, consumindo dados mockados localmente, sem backend real. A autenticação é simples e os dados são armazenados no localStorage para persistência durante a execução.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## Tecnologias Utilizadas
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React  
+- TypeScript  
+- Tailwind CSS  
+- Recharts
+- LocalStorage para persistência local  
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+## Funcionalidades
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Cadastro de clientes com nome completo, e-mail e data de nascimento  
+- Listagem e exibição dos clientes com dados normalizados e tratados no front-end  
+- Autenticação simples, com dados armazenados no localStorage  
+- Gráfico com total de vendas por dia  
+- Destaques visuais para:  
+  - Cliente com maior volume de vendas  
+  - Cliente com maior média de valor por venda  
+  - Cliente com maior frequência de compras  
+- Indicador visual da primeira letra do alfabeto que não aparece no nome do cliente (ou ‘-’ caso todas as letras estejam presentes)  
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-});
-```
+## Estrutura do Projeto
+📦 src
+┣ 📂 components
+┣ 📂 contexts
+┣ 📂 helpers
+┣ 📂 hooks
+┣ 📂 mocks
+┣ 📂 pages
+┣ 📂 routes
+┣ 📂 types
+┣ 📂 utils
+┗ 📜 App.tsx
+
+
+---
+
+## Como Rodar
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/seu-repositorio.git
+
+# Acesse a pasta do projeto
+cd seu-repositorio
+
+# Instale as dependências
+npm install
+
+# Inicie a aplicação
+npm run dev
+
+Feito  por [Gustavo Andrade](https://github.com/gustavo64522)
