@@ -1,4 +1,3 @@
-//ok
 export const mockClients = {
   data: {
     clientes: [

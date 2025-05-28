@@ -1,4 +1,3 @@
-//OK
 export function findMissingLetter(name: string): string {
   const normalized = name.toLowerCase().replace(/[^a-z]/g, "");
   const existingLetters = new Set(normalized);

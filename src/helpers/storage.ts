@@ -1,4 +1,3 @@
-//ok
 import type { Client } from "../types";
 
 const STORAGE_KEY = "clients";

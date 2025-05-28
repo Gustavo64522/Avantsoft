@@ -1,36 +1,40 @@
 import type { Client } from "../types";
 
-type NovoClienteInput = {
-  nomeCompleto: string;
+type NewClientInput = {
+  fullName: string;
   email: string;
-  nascimento: string;
-  vendas?: { data: string; valor: number }[];
+  birthDate: string;
+  sales?: { date: string; value: number }[];
 };
 
 export function addClient(
-  clientes: Client[],
-  novo: NovoClienteInput
+  clients: Client[],
+  newClient: NewClientInput
 ): Client[] {
-  const existe = clientes.find(
-    (c) => c.info.detalhes.email.toLowerCase() === novo.email.toLowerCase()
+  const clientExists = clients.find(
+    (client) =>
+      client.info.detalhes.email.toLowerCase() === newClient.email.toLowerCase()
   );
-  if (existe) {
-    // Se já existe, opcional: poderia atualizar info ou vendas, mas aqui só retorna original
-    return clientes;
+
+  if (clientExists) {
+    return clients;
   }
 
-  const clienteNovo: Client = {
+  const clientToAdd: Client = {
     info: {
-      nomeCompleto: novo.nomeCompleto,
+      nomeCompleto: newClient.fullName,
       detalhes: {
-        email: novo.email,
-        nascimento: novo.nascimento,
+        email: newClient.email,
+        nascimento: newClient.birthDate,
       },
     },
     estatisticas: {
-      vendas: novo.vendas ?? [],
+      vendas: (newClient.sales ?? []).map(({ date, value }) => ({
+        data: date,
+        valor: value,
+      })),
     },
   };
 
-  return [...clientes, clienteNovo];
+  return [...clients, clientToAdd];
 }

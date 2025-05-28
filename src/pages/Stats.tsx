@@ -15,27 +15,28 @@ import { normalizeClients } from "../utils/normalizeClients";
 import { mockClients } from "../mocks/mockData";
 
 export default function Stats() {
-  // rawClients simula dados do localStorage ou mock
-  const rawClients = mockClients.data.clientes;
+  const rawClientData = mockClients.data.clientes;
 
   const clients: Client[] = useMemo(
-    () => normalizeClients(rawClients),
-    [rawClients]
+    () => normalizeClients(rawClientData),
+    [rawClientData]
   );
 
-  const highlights = useMemo(() => calculateHighlights(clients), [clients]);
+  const salesHighlights = useMemo(
+    () => calculateHighlights(clients),
+    [clients]
+  );
 
-  // Aggregate sales by date for chart
-  const salesByDate = useMemo(() => {
-    const salesMap = new Map<string, number>();
+  const aggregatedSalesByDate = useMemo(() => {
+    const salesTotalsByDate = new Map<string, number>();
 
     clients.forEach(({ estatisticas }) => {
       (estatisticas?.vendas ?? []).forEach(({ data, valor }) => {
-        salesMap.set(data, (salesMap.get(data) ?? 0) + valor);
+        salesTotalsByDate.set(data, (salesTotalsByDate.get(data) ?? 0) + valor);
       });
     });
 
-    return Array.from(salesMap.entries())
+    return Array.from(salesTotalsByDate.entries())
       .map(([date, total]) => ({ date, total }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [clients]);
@@ -46,51 +47,54 @@ export default function Stats() {
       <main className="flex-1 p-8">
         <h2 className="text-3xl font-semibold mb-6">Estatísticas</h2>
 
-        {/* Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <article className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-medium text-gray-700">
               Maior volume de vendas
             </h3>
             <p className="mt-2 text-2xl font-bold">
-              {highlights.highestVolume?.name || "-"}
+              {salesHighlights.highestVolume?.name ?? "-"}
             </p>
             <p className="text-gray-500">
-              R$ {highlights.highestVolume?.value.toFixed(2) || "0.00"}
+              R$ {salesHighlights.highestVolume?.value.toFixed(2) ?? "0.00"}
             </p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
+          </article>
+
+          <article className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-medium text-gray-700">
               Maior média por venda
             </h3>
             <p className="mt-2 text-2xl font-bold">
-              {highlights.highestAverage?.name || "-"}
+              {salesHighlights.highestAverage?.name ?? "-"}
             </p>
             <p className="text-gray-500">
-              R$ {highlights.highestAverage?.value.toFixed(2) || "0.00"}
+              R$ {salesHighlights.highestAverage?.value.toFixed(2) ?? "0.00"}
             </p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
+          </article>
+
+          <article className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-medium text-gray-700">
               Maior frequência de compra
             </h3>
             <p className="mt-2 text-2xl font-bold">
-              {highlights.highestFrequency?.name || "-"}
+              {salesHighlights.highestFrequency?.name ?? "-"}
             </p>
             <p className="text-gray-500">
-              {highlights.highestFrequency?.value || 0} purchases
+              {salesHighlights.highestFrequency?.value ?? 0} compras
             </p>
-          </div>
-        </div>
+          </article>
+        </section>
 
-        {/* Sales per day chart */}
-        <div className="bg-white p-6 rounded-lg shadow" style={{ height: 300 }}>
+        <section
+          className="bg-white p-6 rounded-lg shadow"
+          style={{ height: 300 }}
+        >
           <h3 className="text-lg font-medium text-gray-700 mb-4">
             Total de vendas por dia
           </h3>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={salesByDate}
+              data={aggregatedSalesByDate}
               margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
@@ -102,7 +106,7 @@ export default function Stats() {
               <Bar dataKey="total" fill="#4f39f6" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </section>
       </main>
     </div>
   );

@@ -1,5 +1,4 @@
-import type { JSX } from "react";
-
+import type { ReactNode } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
@@ -8,15 +7,15 @@ import Stats from "../pages/Stats";
 import RegisterClient from "../pages/RegisterClient";
 import ClientList from "../pages/ClientList";
 
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+const PrivateRoute = ({ children }: { children: ReactNode }) => {
   const { signed, loading } = useAuth();
 
-  if (loading) return null; // ou um spinner, se quiser
+  if (loading) return null;
 
   return signed ? children : <Navigate to="/signin" />;
 };
 
-const PublicRoute = ({ children }: { children: JSX.Element }) => {
+const PublicRoute = ({ children }: { children: ReactNode }) => {
   const { signed, loading } = useAuth();
 
   if (loading) return null;
@@ -44,7 +43,6 @@ export default function RoutesApp() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/stats"
           element={
@@ -69,8 +67,6 @@ export default function RoutesApp() {
             </PrivateRoute>
           }
         />
-
-        {/* Esse aqui sem wrapper, fora de qualquer rota de autenticação */}
         <Route
           path="*"
           element={

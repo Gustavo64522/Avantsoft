@@ -1,62 +1,51 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
-import { normalizeClients } from "../utils/normalizeClients";
-import { mockClients } from "../mocks/mockData";
 import type { Client } from "../types";
-import {
-  getClientsFromStorage,
-  saveClientsToStorage,
-} from "../helpers/storage";
+import { useClients } from "../hooks/useClients";
+import { validateClientForm } from "../utils/validateClientForm";
+import type {
+  ClientFormErrors,
+  ClientFormData,
+} from "../utils/validateClientForm";
 
 export default function RegisterClient() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const { clients, addClient } = useClients();
 
-  useEffect(() => {
-    const storedClients = getClientsFromStorage();
-    if (storedClients.length === 0) {
-      const normalized = normalizeClients(mockClients.data.clientes);
-      setClients(normalized);
-      saveClientsToStorage(normalized);
-    } else {
-      setClients(storedClients);
-    }
-  }, []);
+  const [formData, setFormData] = useState<ClientFormData>({
+    fullName: "",
+    email: "",
+    birthdate: "",
+  });
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-
-  const [errors, setErrors] = useState({
+  const [formErrors, setFormErrors] = useState<ClientFormErrors>({
     fullName: false,
     email: false,
     birthdate: false,
     emailExists: false,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [formSuccess, setFormSuccess] = useState(false);
 
-    const hasEmpty = !fullName || !email || !birthdate;
-    const emailExists = clients.some(
-      (c) => c.info.detalhes.email.toLowerCase() === email.toLowerCase()
-    );
+  const handleInputChange =
+    (field: keyof ClientFormData) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+    };
 
-    setErrors({
-      fullName: !fullName,
-      email: !email || emailExists,
-      birthdate: !birthdate,
-      emailExists,
-    });
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
 
-    if (hasEmpty || emailExists) return;
+    const errors = validateClientForm(formData, clients);
+    setFormErrors(errors);
+
+    if (Object.values(errors).some(Boolean)) return;
 
     const newClient: Client = {
       info: {
-        nomeCompleto: fullName,
+        nomeCompleto: formData.fullName,
         detalhes: {
-          email,
-          nascimento: birthdate,
+          email: formData.email,
+          nascimento: formData.birthdate,
         },
       },
       estatisticas: {
@@ -64,18 +53,11 @@ export default function RegisterClient() {
       },
     };
 
-    const updatedClients = [...clients, newClient];
-    setClients(updatedClients);
-    saveClientsToStorage(updatedClients);
+    addClient(newClient);
 
-    // limpar
-    setFullName("");
-    setEmail("");
-    setBirthdate("");
-
-    // mostrar popup
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setFormData({ fullName: "", email: "", birthdate: "" });
+    setFormSuccess(true);
+    setTimeout(() => setFormSuccess(false), 3000);
   };
 
   return (
@@ -95,12 +77,12 @@ export default function RegisterClient() {
               <input
                 type="text"
                 className={`w-full px-4 py-2 border rounded-lg ${
-                  errors.fullName ? "border-red-500" : "border-gray-300"
+                  formErrors.fullName ? "border-red-500" : "border-gray-300"
                 }`}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                value={formData.fullName}
+                onChange={handleInputChange("fullName")}
               />
-              {errors.fullName && (
+              {formErrors.fullName && (
                 <p className="text-red-600 text-sm mt-1">
                   Nome completo é obrigatório.
                 </p>
@@ -114,14 +96,14 @@ export default function RegisterClient() {
               <input
                 type="email"
                 className={`w-full px-4 py-2 border rounded-lg ${
-                  errors.email ? "border-red-500" : "border-gray-300"
+                  formErrors.email ? "border-red-500" : "border-gray-300"
                 }`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleInputChange("email")}
               />
-              {errors.email && (
+              {formErrors.email && (
                 <p className="text-red-600 text-sm mt-1">
-                  {errors.emailExists
+                  {formErrors.emailExists
                     ? "Já existe cliente com esse email."
                     : "Email é obrigatório."}
                 </p>
@@ -135,12 +117,12 @@ export default function RegisterClient() {
               <input
                 type="date"
                 className={`w-full px-4 py-2 border rounded-lg ${
-                  errors.birthdate ? "border-red-500" : "border-gray-300"
+                  formErrors.birthdate ? "border-red-500" : "border-gray-300"
                 }`}
-                value={birthdate}
-                onChange={(e) => setBirthdate(e.target.value)}
+                value={formData.birthdate}
+                onChange={handleInputChange("birthdate")}
               />
-              {errors.birthdate && (
+              {formErrors.birthdate && (
                 <p className="text-red-600 text-sm mt-1">
                   Data de nascimento é obrigatória.
                 </p>
@@ -157,8 +139,7 @@ export default function RegisterClient() {
         </div>
       </main>
 
-      {/* Popup de sucesso */}
-      {showSuccess && (
+      {formSuccess && (
         <div className="absolute top-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded shadow-md text-sm">
           Cliente cadastrado com sucesso!
         </div>

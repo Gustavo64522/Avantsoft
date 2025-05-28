@@ -14,49 +14,65 @@ type AuthProviderProps = {
   children: ReactNode;
 };
 
+const USERS_STORAGE_KEY = "users_bd";
+const TOKEN_STORAGE_KEY = "user_token";
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // <-- novo
+  const [loading, setLoading] = useState(true);
 
   const getStoredUsers = (): StoredUser[] => {
-    const usersJSON = localStorage.getItem("users_bd");
-    return usersJSON ? JSON.parse(usersJSON) : [];
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    return storedUsers ? JSON.parse(storedUsers) : [];
   };
 
   useEffect(() => {
-    const userToken = localStorage.getItem("user_token");
-    if (userToken) {
-      const { email } = JSON.parse(userToken);
-      const users = getStoredUsers();
-      const foundUser = users.find((u) => u.email === email);
-      if (foundUser) setUser({ email: foundUser.email });
+    const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+
+    if (storedToken) {
+      const { email } = JSON.parse(storedToken);
+      const storedUsers = getStoredUsers();
+      const matchingUser = storedUsers.find(
+        (storedUser) => storedUser.email === email
+      );
+
+      if (matchingUser) {
+        setUser({ email: matchingUser.email });
+      }
     }
-    setLoading(false); // <-- só libera quando terminar
+
+    setLoading(false);
   }, []);
 
   const signin = (email: string, password: string): string | void => {
-    const users = getStoredUsers();
-    const foundUser = users.find((u) => u.email === email);
-    if (!foundUser) return "Usuário não cadastrado";
-    if (foundUser.password !== password) return "E-mail ou senha incorretos";
+    const storedUsers = getStoredUsers();
+    const matchingUser = storedUsers.find(
+      (storedUser) => storedUser.email === email
+    );
+
+    if (!matchingUser) return "Usuário não cadastrado";
+    if (matchingUser.password !== password) return "E-mail ou senha incorretos";
 
     const token = Math.random().toString(36).substring(2);
-    localStorage.setItem("user_token", JSON.stringify({ email, token }));
+    localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ email, token }));
     setUser({ email });
   };
 
   const signup = (email: string, password: string): string | void => {
-    const users = getStoredUsers();
-    if (users.some((u) => u.email === email))
-      return "Já tem uma conta com esse E-mail";
+    const storedUsers = getStoredUsers();
+    const emailAlreadyExists = storedUsers.some(
+      (storedUser) => storedUser.email === email
+    );
 
-    const newUsers = [...users, { email, password }];
-    localStorage.setItem("users_bd", JSON.stringify(newUsers));
+    if (emailAlreadyExists) return "Já tem uma conta com esse E-mail";
+
+    const updatedUsers = [...storedUsers, { email, password }];
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
   };
 
   const signout = () => {
     setUser(null);
-    localStorage.removeItem("user_token");
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
   };
 
   return (

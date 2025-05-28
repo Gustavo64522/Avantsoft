@@ -1,9 +1,17 @@
 import type { Client } from "../types";
 
-type Highlight = { name: string; value: number };
+type Highlight = {
+  name: string;
+  value: number;
+};
 
-function getHigher(current: Highlight | null, candidate: Highlight): Highlight {
-  if (!current || candidate.value > current.value) return candidate;
+function getHighlightWithHighestValue(
+  current: Highlight | null,
+  candidate: Highlight
+): Highlight {
+  if (!current || candidate.value > current.value) {
+    return candidate;
+  }
   return current;
 }
 
@@ -14,27 +22,30 @@ export function calculateHighlights(clients: Client[]) {
     highestFrequency: null as Highlight | null,
   };
 
-  return clients.reduce((acc, { info, estatisticas }) => {
-    const sales = estatisticas?.vendas ?? [];
-    const totalSales = sales.reduce((sum, sale) => sum + sale.valor, 0);
-    const frequency = sales.length;
-    const average = frequency > 0 ? totalSales / frequency : 0;
+  return clients.reduce((highlights, client) => {
+    const clientName = client.info.nomeCompleto;
+    const sales = client.estatisticas?.vendas ?? [];
 
-    acc.highestVolume = getHigher(acc.highestVolume, {
-      name: info.nomeCompleto,
-      value: totalSales,
-    });
+    const totalSalesValue = sales.reduce((sum, sale) => sum + sale.valor, 0);
+    const totalSalesCount = sales.length;
+    const averageSaleValue =
+      totalSalesCount > 0 ? totalSalesValue / totalSalesCount : 0;
 
-    acc.highestAverage = getHigher(acc.highestAverage, {
-      name: info.nomeCompleto,
-      value: average,
-    });
+    highlights.highestVolume = getHighlightWithHighestValue(
+      highlights.highestVolume,
+      { name: clientName, value: totalSalesValue }
+    );
 
-    acc.highestFrequency = getHigher(acc.highestFrequency, {
-      name: info.nomeCompleto,
-      value: frequency,
-    });
+    highlights.highestAverage = getHighlightWithHighestValue(
+      highlights.highestAverage,
+      { name: clientName, value: averageSaleValue }
+    );
 
-    return acc;
+    highlights.highestFrequency = getHighlightWithHighestValue(
+      highlights.highestFrequency,
+      { name: clientName, value: totalSalesCount }
+    );
+
+    return highlights;
   }, initialHighlights);
 }

@@ -1,69 +1,60 @@
-import type { Cliente } from "../types";
+import type { Client } from "../types";
 
 function extractString(
-  obj: Record<string, unknown> | undefined,
+  source: Record<string, unknown> | undefined,
   key: string
 ): string {
-  if (!obj) return "";
-  const val = obj[key];
-  return typeof val === "string" ? val : "";
+  if (!source) return "";
+  const value = source[key];
+  return typeof value === "string" ? value : "";
 }
 
-function extractInfo(obj: Record<string, unknown>): {
-  nomeCompleto: string;
-  detalhes: { email: string; nascimento: string };
-} {
-  const info = obj.info as Record<string, unknown> | undefined;
-  const detalhes = info
-    ? (info.detalhes as Record<string, unknown> | undefined)
-    : undefined;
+function parseInfo(record: Record<string, unknown>) {
+  const infoRecord = record.info as Record<string, unknown> | undefined;
+  const detailsRecord = infoRecord?.detalhes as
+    | Record<string, unknown>
+    | undefined;
 
-  return {
-    nomeCompleto:
-      extractString(info, "nomeCompleto") || extractString(obj, "nomeCompleto"),
-    detalhes: {
-      email: extractString(detalhes, "email") || extractString(obj, "email"),
-      nascimento: extractString(detalhes, "nascimento"),
-    },
+  const fullName =
+    extractString(infoRecord, "nomeCompleto") ||
+    extractString(record, "nomeCompleto");
+
+  const details = {
+    email:
+      extractString(detailsRecord, "email") || extractString(record, "email"),
+    nascimento: extractString(detailsRecord, "nascimento"),
   };
+
+  return { nomeCompleto: fullName, detalhes: details };
 }
 
-function extractEstatisticas(obj: Record<string, unknown>): {
-  vendas: { data: string; valor: number }[];
-} {
-  const estatisticasRaw = obj.estatisticas as
+function parseStatistics(record: Record<string, unknown>) {
+  const statsRaw = record.estatisticas as
     | { vendas?: { data: string; valor: number }[] }
     | undefined;
 
-  return {
-    vendas: estatisticasRaw?.vendas ?? [],
-  };
+  return { vendas: statsRaw?.vendas ?? [] };
 }
 
-export function normalizeClients(rawClients: unknown[]): Cliente[] {
-  const map = new Map<string, Cliente>();
+export function normalizeClients(rawClients: unknown[]): Client[] {
+  const clientMap = new Map<string, Client>();
 
-  for (const raw of rawClients) {
-    if (typeof raw !== "object" || raw === null) continue;
+  for (const rawClient of rawClients) {
+    if (typeof rawClient !== "object" || rawClient === null) continue;
+    const clientRecord = rawClient as Record<string, unknown>;
 
-    const obj = raw as Record<string, unknown>;
-
-    const { nomeCompleto, detalhes } = extractInfo(obj);
-
+    const { nomeCompleto, detalhes } = parseInfo(clientRecord);
     if (!detalhes.email) continue;
 
-    const estatisticas = extractEstatisticas(obj);
+    const estatisticas = parseStatistics(clientRecord);
 
-    if (!map.has(detalhes.email)) {
-      map.set(detalhes.email, {
-        info: {
-          nomeCompleto,
-          detalhes,
-        },
+    if (!clientMap.has(detalhes.email)) {
+      clientMap.set(detalhes.email, {
+        info: { nomeCompleto, detalhes },
         estatisticas,
       });
     }
   }
 
-  return Array.from(map.values());
+  return Array.from(clientMap.values());
 }

@@ -1,4 +1,3 @@
-//ok
 export type Client = {
   info: {
     nomeCompleto: string;
